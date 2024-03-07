@@ -160,11 +160,14 @@ class ChatServer : public WebSocketServer{
             sprintf(name,"user%d",index);
             userDetails[index].setName(name);
         }
-        cout<<userDetails[index].getName()<<endl;
     }
 
     void removeClient(int index){
         if(userDetails.find(index) != userDetails.end()){
+            char buff[50];
+            sprintf(buff, "%s left the chat\n", userDetails[index].getName());
+            cout<<userDetails[index].getName()<<" left the chat\n";
+            sendBroadcastMsg(index, buff);
             userDetails.erase(index);
         }
     }
@@ -175,8 +178,12 @@ class ChatServer : public WebSocketServer{
         char *name;
         if (name = strstr(msg, "Name: ")) {
             char buff[50];
-            setOrUpdateName(index, name + 6);
-            sprintf(buff, "%s joined the chat\n", name + 6);
+            char* oldname = setOrUpdateName(index, name + 6);
+            // printf("%s", oldname);
+            if(strstr(oldname, "user"))
+                sprintf(buff, "%s joined the chat\n", name + 6);
+            else
+                sprintf(buff, "%s updated the name to %s", oldname, name + 6);
             printf("%s\n", buff);
             sendBroadcastMsg(index, buff);
         } else {
@@ -206,8 +213,12 @@ class ChatServer : public WebSocketServer{
         }
     }
 
-    void setOrUpdateName(int index, char *name) {
+    char* setOrUpdateName(int index, char *name) {
+        char *already = new char[50];
+        strcpy(already, userDetails[index].getName());
+
         userDetails[index].setName(name);
+        return already;
     }
 
     void sendPrivateMsg(int index,char* recvr, char *msg) {

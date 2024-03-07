@@ -14,7 +14,7 @@ class ChatClient
         end
         
         @ws.on :message do |msg|
-            puts msg.data
+            puts "\n",msg.data
         end
 
         @ws.on :close do |event|
@@ -28,7 +28,7 @@ class ChatClient
         
         @name = $stdin.gets.chomp
         @ws.send("Name: #{@name}")
-        puts "Enter an option\n1.Send broadcast msg\n2.Send private message\n3.Get Active List\n4.Exit"
+        puts "Enter an option\n1.Send broadcast msg\n2.Send private message\n3.Get Active List\n4.Update Name\n5.Exit"
 
         loop do
             input = $stdin.gets.chomp
@@ -44,9 +44,16 @@ class ChatClient
                 @ws.send("To: #{recvr}:#{pmsg}")
             elsif input == '3'
                 @ws.send("online")
-            else
+            elsif input == '4'
+                print "Enter your name: "
+                @name = $stdin.gets.chomp
+                @ws.send("Name: #{@name}")
+                puts "Updated name to #{@name}"
+            elsif input == '5'
                 @ws.close
                 break
+            else
+                puts "Wrong option... Please enter a valid option"
             end
         end
     end
